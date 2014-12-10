@@ -56,25 +56,25 @@ public class AccelerationMonitor implements SensorEventListener{
 		if (!observe)
 			return;
 		if (arg0.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-	        float dx = arg0.values[0] - prex;
-	        float dy = arg0.values[1] - prey;
-	        float dz = arg0.values[2] - prez;
-	        float mag = (float)Math.sqrt(dx*dx + dy*dy +dz*dz);
-	        if (mag > MIN_ACCEL){
-	        	accelList.add(new AccelEvent(mag));
-	        	fileLogger.write("\t"+mag);
-	        	//Log.d("AccelMon", "\t"+mag+"\t"+dx+"\t"+dy+"\t"+dz);
-	        }
-	        prex = arg0.values[0]; prey = arg0.values[1]; prez = arg0.values[2];
-	    }
+			float dx = arg0.values[0] - prex;
+			float dy = arg0.values[1] - prey;
+			float dz = arg0.values[2] - prez;
+			float mag = (float)Math.sqrt(dx*dx + dy*dy +dz*dz);
+			if (mag > MIN_ACCEL){
+				accelList.add(new AccelEvent(mag));
+				fileLogger.write("\t"+mag);
+				//Log.d("AccelMon", "\t"+mag+"\t"+dx+"\t"+dy+"\t"+dz);
+			}
+			prex = arg0.values[0]; prey = arg0.values[1]; prez = arg0.values[2];
+		}
 	}
 
-    public void clearEvents(){
-        Log.d("AccelMon", "Clearing Events...");
-        accelList.removeAll(accelList);
-        Log.d("AccelMon", "accelLen "+accelList.size());
+	public void clearEvents(){
+		Log.d("AccelMon", "Clearing Events...");
+		accelList.removeAll(accelList);
+		Log.d("AccelMon", "accelLen "+accelList.size());
 
-    }
+	}
 
 	public void addNoEvent(){
 		accelList.add(new AccelEvent(1.0f));
@@ -85,10 +85,10 @@ public class AccelerationMonitor implements SensorEventListener{
 		Iterator<AccelEvent> iter = accelList.iterator();
 		List<AccelEvent> removeList = new ArrayList<AccelEvent>();
 		while (iter.hasNext()) {
-		    AccelEvent ae = iter.next();
+			AccelEvent ae = iter.next();
 			if (ae.expire(EXP_TIME)) {
-		        removeList.add(ae);
-		    }
+				removeList.add(ae);
+			}
 		}
 		accelList.removeAll(removeList);
 	}

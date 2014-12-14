@@ -218,23 +218,21 @@ public class MainActivity extends ActionBarActivity {
 			super.onStart();
 		}
 
-        @Override
-        public void onResume(){
-            Log.d("LucidMainFragment", "onResume...");
-            super.onResume();
-            if (lucidButton != null){
-                if (isServiceRunning(LucidController.class)) {
-                    Intent thisIntent = new Intent(getActivity().getBaseContext(), LucidController.class);
-                    getActivity().bindService(thisIntent, connection, BIND_AUTO_CREATE);
-                    lucidButton.setText("Stop Lucidity");
-                } else{
-                    lucidButton.setText("Start Lucidity");
-                }
-            }
+		@Override
+		public void onResume(){
+			Log.d("LucidMainFragment", "onResume...");
+			super.onResume();
+			if (lucidButton != null){
+				if (isServiceRunning(LucidController.class)) {
+					Intent thisIntent = new Intent(getActivity().getBaseContext(), LucidController.class);
+					getActivity().bindService(thisIntent, connection, BIND_AUTO_CREATE);
+					lucidButton.setText("Stop Lucidity");
+				} else{
+					lucidButton.setText("Start Lucidity");
+				}
+			}
 
-        }
+		}
 
 	}
-
-
 }

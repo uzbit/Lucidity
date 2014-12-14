@@ -98,8 +98,6 @@ public class LucidController extends Service{
 		isStarted = false;
 	}
 
-
-
 	@Override
 	public IBinder onBind(Intent intent) {
 		return binder;

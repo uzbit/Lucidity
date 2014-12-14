@@ -69,6 +69,10 @@ public class SignalGenerator extends Activity {
 		if (audioTrack != null){
 			audioTrack.stop();
 			audioTrack.release();
+			audioTrack = null;
+		}
+		if (signalThread != null){
+			signalThread.interrupt();
 		}
 	}
 

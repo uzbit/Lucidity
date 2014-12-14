@@ -1,6 +1,8 @@
 package com.slyco.lucidity;
 
+import android.app.ActivityManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
@@ -59,6 +61,12 @@ public class MainActivity extends ActionBarActivity {
 	}
 
 	@Override
+	public void onResume(){
+		Log.d("LucidMain", "Main onResume...");
+		super.onResume();
+	}
+
+	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main, menu);
@@ -84,6 +92,7 @@ public class MainActivity extends ActionBarActivity {
 		static ServiceConnection connection = new ServiceConnection() {
 
 			public void onServiceDisconnected(ComponentName name) {
+				lucidController.stop();
 				lucidController = null;
 			}
 
@@ -96,8 +105,18 @@ public class MainActivity extends ActionBarActivity {
 		public MainFragment() {
 		}
 
+		public boolean isServiceRunning(Class<?> serviceClass) {
+			ActivityManager manager = (ActivityManager) getActivity().getBaseContext().getSystemService(Context.ACTIVITY_SERVICE);
+			for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+				if (serviceClass.getName().equals(service.service.getClassName())) {
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public void addButtons() {
-			Log.d("LucidMain", "Adding buttons...");
+			Log.d("LucidMainFragment", "Adding buttons...");
 			if (clearEventsButton == null) {
 				clearEventsButton = (Button) getView().findViewById(R.id.clearEvents);
 				clearEventsButton.setOnClickListener(new OnClickListener() {
@@ -115,7 +134,7 @@ public class MainActivity extends ActionBarActivity {
 					@Override
 					public void onClick(View arg0) {
 						Intent thisIntent = new Intent(getActivity().getBaseContext(), LucidController.class);
-						if (lucidController == null){
+						if (!isServiceRunning(LucidController.class)){
 							getActivity().bindService(thisIntent, connection, BIND_AUTO_CREATE);
 							getActivity().startService(thisIntent);
 							lucidButton.setText("Stop Lucidity");
@@ -149,21 +168,21 @@ public class MainActivity extends ActionBarActivity {
 
 		@Override
 		public void onSaveInstanceState(Bundle outState) {
-			Log.d("LucidMain", "onSaveInstanceState...");
+			Log.d("LucidMainFragment", "onSaveInstanceState...");
 			super.onSaveInstanceState(outState);
 		}
 		
 		@Override
 		public void onCreate(Bundle savedInstanceState)
 		{
-			Log.d("LucidMain", "onCreate...");
+			Log.d("LucidMainFragment", "onCreate...");
 			super.onCreate(savedInstanceState);
 		}
 		
 		@Override
 		public View onCreateView(LayoutInflater inflater, ViewGroup container,
 				Bundle savedInstanceState) {
-			Log.d("LucidMain", "onCreateView...");
+			Log.d("LucidMainFragment", "onCreateView...");
 
 			View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 			return rootView;
@@ -171,14 +190,14 @@ public class MainActivity extends ActionBarActivity {
 	   
 		@Override
 		public void onViewCreated(View view, Bundle savedInstanceState) {
-			Log.d("LucidMain", "onViewCreated...");
+			Log.d("LucidMainFragment", "onViewCreated...");
 			super.onViewCreated(view, savedInstanceState);
 			addButtons();
 		}
 
 		@Override
 		public void onDestroy(){
-			Log.d("LucidMain", "onDestroy...");
+			Log.d("LucidMainFragment", "onDestroy...");
 			Intent thisIntent = new Intent(getActivity().getBaseContext(), LucidController.class);
 			if (getActivity().stopService(thisIntent)) {
 				getActivity().unbindService(connection);
@@ -189,15 +208,33 @@ public class MainActivity extends ActionBarActivity {
 
 		@Override
 		public void onStop(){
-			Log.d("LucidMain", "onStop...");
+			Log.d("LucidMainFragment", "onStop...");
 			super.onStop();
 		}
 
 		@Override
 		public void onStart(){
-			Log.d("LucidMain", "onStart...");
+			Log.d("LucidMainFragment", "onStart...");
 			super.onStart();
 		}
+
+        @Override
+        public void onResume(){
+            Log.d("LucidMainFragment", "onResume...");
+            super.onResume();
+            if (lucidButton != null){
+                if (isServiceRunning(LucidController.class)) {
+                    Intent thisIntent = new Intent(getActivity().getBaseContext(), LucidController.class);
+                    getActivity().bindService(thisIntent, connection, BIND_AUTO_CREATE);
+                    lucidButton.setText("Stop Lucidity");
+                } else{
+                    lucidButton.setText("Start Lucidity");
+                }
+            }
+
+        }
+
 	}
+
 
 }

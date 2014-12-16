@@ -155,11 +155,11 @@ public class MainActivity extends ActionBarActivity {
 					@Override
 					public void onClick(View arg0) {
 						if (signalAC.isPlaying()) {
-							acButton.setText("40Hz Off");
+							acButton.setText((int)LucidController.DEFAULT_FREQUENCY + "Hz Off");
 							signalAC.stopSignal();
 						} else {
-							acButton.setText("40Hz On");
-							signalAC.startSignal(40.0, 0.0, 1.0f, 1.0f);
+							acButton.setText((int)LucidController.DEFAULT_FREQUENCY + "Hz On");
+							signalAC.startSignal(LucidController.DEFAULT_FREQUENCY, 0.0, 1.0f, 1.0f);
 						}
 					}
 				});

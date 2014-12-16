@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import android.os.Environment;
+import android.util.Log;
 
 public class FileLogger {
 	String filename = "lucidity.log";
@@ -16,7 +17,8 @@ public class FileLogger {
 		
 	public void write(String string){
 		try {
-			outputStream.write((Utilities.getDateString() +"\t"+ Utilities.getTimeSinceEpoch() +"\t"+ string +"\n").getBytes());
+            Log.d("FileLogger", string);
+            outputStream.write((Utilities.getDateString() +"\t"+ Utilities.getTimeSinceEpoch() +"\t"+ string +"\n").getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

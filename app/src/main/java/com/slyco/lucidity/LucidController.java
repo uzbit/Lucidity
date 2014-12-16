@@ -6,23 +6,31 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
-//Notes: +0.4v DC offset for when signal off across wet electrodes while wearing.
-//       Max volume is 5.5v p-p when signal on, 9V battery reads 7.96v
+//Notes:
+//  +0.4v DC offset for when signal off across wet electrodes while wearing.
+//  This offset was determined to be caused by the voltage of mah brain.
+//  At max volume the signal is 5.5v p-p when signal on, 9V battery reads 7.96v
 
 public class LucidController extends Service{
 
-	private Thread lucidThread = null;
 	public AccelerationMonitor accelMon = null;
-	private SignalGenerator signalGen = null;
+    public static float DEFAULT_FREQUENCY = 25;
+
+    private Thread lucidThread = null;
+    private SignalGenerator signalGen = null;
 	private FileLogger fileLogger = null;
 	private boolean isStarted = false;
 	private long startTime = 0;
-	private short runCount = 0;
-	private static float MIN_START = 2.0f; //2:00 am.
-	private static float MAX_START = 5.5f; //5:30 am.
+	private float frequency = DEFAULT_FREQUENCY;
+	//private short runCount = 0;
+    private static boolean DO_FREQ_SCAN = true;
+    private static float MAX_FREQ = 43.0f; //43Hz.
+    private static float FREQ_INC = 3.0f; //3Hz increments.
+    private static float MIN_START = 2.0f; //2:00 am. Set to 0 for testing.
+	private static float MAX_START = 5.5f; //5:30 am. Set to 24 for testing.
 	private static float RUN_TIME = 1.0f*60; //1.0 mins running.
-	private static short MAX_RUNS_PER_SESSION = 3;
-	private IBinder binder = new LocalBinder();
+    //private static short MAX_RUNS_PER_SESSION = 3;
+    private IBinder binder = new LocalBinder();
 
 	public LucidController(){
 		accelMon = new AccelerationMonitor(this);
@@ -38,14 +46,18 @@ public class LucidController extends Service{
 			accelMon.clearExpired();
 			Log.d("LucidController", "accelLen "+accelMon.accelList.size());
 			if (checkStartLucid()){
-				fileLogger.write("Starting signal...");
+				fileLogger.write("Starting "+frequency+"Hz signal...");
 				startTime = Utilities.getTimeSinceEpoch();
-				signalGen.startSignal(40.0, 0.0, 1.0f, 1.0f);
-				runCount++;
+				signalGen.startSignal(frequency, 0.0, 1.0f, 1.0f);
+				if (DO_FREQ_SCAN){
+                    frequency += FREQ_INC;
+                    if (frequency > MAX_FREQ) frequency = DEFAULT_FREQUENCY;
+                }
+                //runCount++;
 			}
 			if (checkStopLucid()){
-				fileLogger.write("Stopping signal...");
-				signalGen.stopSignal();
+                fileLogger.write("Stopping "+frequency+"Hz signal...");
+                signalGen.stopSignal();
 			}
 			Utilities.sleepThread(30);
 		}
@@ -56,7 +68,7 @@ public class LucidController extends Service{
 		float currHour = Utilities.getCurrentHour();
 		if (currHour >= MIN_START && 
 			currHour <= MAX_START && 
-			runCount < MAX_RUNS_PER_SESSION &&
+			//runCount < MAX_RUNS_PER_SESSION &&
 			!signalGen.isPlaying() &&
 			isInREM()){
 			return true;
@@ -67,10 +79,10 @@ public class LucidController extends Service{
 	public boolean checkStopLucid(){
 		boolean doStop = (signalGen.isPlaying() &&
 				(Utilities.getTimeSinceEpoch() - startTime) > RUN_TIME);
-		if (doStop && runCount == MAX_RUNS_PER_SESSION){
+		/*if (doStop && runCount == MAX_RUNS_PER_SESSION){
 			accelMon.addNoEvent();
 			runCount = 0;
-		}
+		}*/
 		return doStop;
 	}
 	

@@ -4,14 +4,13 @@ import android.app.Activity;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
 
 public class SignalGenerator extends Activity {
 	
 	private Thread signalThread = null;
 	private AudioTrack audioTrack  = null;            
 	private boolean playSignal = false;
-	private double frequency = 40; 
+	private double frequency = LucidController.DEFAULT_FREQUENCY;
 	private double phase = Math.PI/2.0; 
 	private int sampleRate = 8000;
 	private double duration = 1;
@@ -57,15 +56,13 @@ public class SignalGenerator extends Activity {
 	}
 	
 	public void startSignal() {
-		Log.d("SignalGen", "Starting signal...");
 		playSignal = true;
 		signalThread = new Thread(runSignal);
 		signalThread.start();
 	}
 	
 	public void stopSignal(){
-		Log.d("SignalGen", "Stopping signal...");
-		playSignal = false;
+        playSignal = false;
 		if (audioTrack != null){
 			audioTrack.stop();
 			audioTrack.release();

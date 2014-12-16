@@ -231,8 +231,6 @@ public class MainActivity extends ActionBarActivity {
 					lucidButton.setText("Start Lucidity");
 				}
 			}
-
 		}
-
 	}
 }

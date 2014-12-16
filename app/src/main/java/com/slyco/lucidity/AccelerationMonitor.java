@@ -19,8 +19,8 @@ public class AccelerationMonitor implements SensorEventListener{
 	private boolean observe = false;
 	private FileLogger fileLogger = null;
 	private float prex = 0, prey = 0, prez = 0;
-	private static float MIN_ACCEL = 0.15f;
-	private static long EXP_TIME = 1800; //expire after 30 mins
+	private static float MIN_ACCEL = 0.18f; //Minimum m/s^2 difference between current and last reading.
+	private static long EXP_TIME = 20*60; //expire after 20 mins.
 	public List<AccelEvent> accelList = new CopyOnWriteArrayList<AccelEvent>();
 	
 	public AccelerationMonitor(Context c){
@@ -63,7 +63,6 @@ public class AccelerationMonitor implements SensorEventListener{
 			if (mag > MIN_ACCEL){
 				accelList.add(new AccelEvent(mag));
 				fileLogger.write("\t"+mag);
-				//Log.d("AccelMon", "\t"+mag+"\t"+dx+"\t"+dy+"\t"+dz);
 			}
 			prex = arg0.values[0]; prey = arg0.values[1]; prez = arg0.values[2];
 		}
@@ -73,7 +72,6 @@ public class AccelerationMonitor implements SensorEventListener{
 		Log.d("AccelMon", "Clearing Events...");
 		accelList.removeAll(accelList);
 		Log.d("AccelMon", "accelLen "+accelList.size());
-
 	}
 
 	public void addNoEvent(){

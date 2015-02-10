@@ -19,7 +19,7 @@ public class AccelerationMonitor implements SensorEventListener{
 	private boolean observe = false;
 	private FileLogger fileLogger = null;
 	private float prex = 0, prey = 0, prez = 0;
-	private static float MIN_ACCEL = 0.18f; //Minimum m/s^2 difference between current and last reading.
+	private static float MIN_ACCEL = 0.1f; //Minimum m/s^2 difference between current and last reading.
 	private static long EXP_TIME = 20*60; //expire after 20 mins.
 	public List<AccelEvent> accelList = new CopyOnWriteArrayList<AccelEvent>();
 	
@@ -39,7 +39,7 @@ public class AccelerationMonitor implements SensorEventListener{
 		if(sensorManager == null && context != null) {
 			sensorManager = (SensorManager) context.getSystemService(Context.SENSOR_SERVICE);
 			sensorManager.registerListener(this, sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL);
-		}
+        }
 	}
 	
 	public void stopMonitor(){
@@ -53,10 +53,10 @@ public class AccelerationMonitor implements SensorEventListener{
 	
 	@Override
 	public void onSensorChanged(SensorEvent arg0) {
-		if (!observe)
+        if (!observe)
 			return;
-		if (arg0.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-			float dx = arg0.values[0] - prex;
+        if (arg0.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            float dx = arg0.values[0] - prex;
 			float dy = arg0.values[1] - prey;
 			float dz = arg0.values[2] - prez;
 			float mag = (float)Math.sqrt(dx*dx + dy*dy +dz*dz);

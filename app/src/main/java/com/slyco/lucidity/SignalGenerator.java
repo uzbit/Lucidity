@@ -11,17 +11,19 @@ public class SignalGenerator extends Activity {
 	private AudioTrack audioTrack  = null;            
 	private boolean playSignal = false;
 	private double frequency = LucidController.DEFAULT_FREQUENCY;
-	private double phase = Math.PI/2.0; 
-	private int sampleRate = 8000;
-	private double duration = 1;
+	private double phase = 0.0; //Math.PI/2.0; 
 	private float leftVol = 1.0f, rightVol = 1.0f;
+	
+	private int SAMPLE_RATE = 8000;
+	private float DURATION = 1f;
+	private float RAMP_FRACTION = 0.1f;
 	
 	Runnable runSignal = new Runnable(){       
 		public void run(){
 			Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 			byte generatedSnd[] = getSignal();
 			audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 
-					sampleRate, 
+					SAMPLE_RATE, 
 					AudioFormat.CHANNEL_OUT_MONO,
 					AudioFormat.ENCODING_PCM_16BIT, 
 					2*generatedSnd.length,
@@ -35,23 +37,42 @@ public class SignalGenerator extends Activity {
 	};
 			
 	public byte [] getSignal(){
-		int numSamples = (int) Math.ceil(duration * sampleRate);
+		int numSamples = (int) Math.ceil(DURATION * SAMPLE_RATE);
 		double sample[] = new double[numSamples];
 		byte generatedSnd[] = new byte[2 * numSamples];
-
+		
 		for (int i = 0; i < numSamples; ++i) 
-			sample[i] = Math.cos(frequency * 2 * Math.PI * i / (sampleRate) + phase);
+			sample[i] = Math.sin(frequency * 2 * Math.PI * i / (SAMPLE_RATE) + phase);
 
 		// convert to 16 bit pcm sound array
 		// assumes the sample buffer is normalized.
 		int idx = 0;
-		for (final double dVal : sample) {
+		int ramp = numSamples * RAMP_FRACTION;
+ 
+		for (int i = 0; i < ramp; i++) {
 			// scale to maximum amplitude
-			final short val = (short) ((dVal * 32767));
+			final short val = (short) ((sample[i] * 32767) * i / ramp);
 			// in 16 bit wav PCM, first byte is the low order byte
 			generatedSnd[idx++] = (byte) (val & 0x00ff);
 			generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
 		}
+	 
+		for (int i = ramp; i < numSamples - ramp; i++) {
+			// scale to maximum amplitude
+			final short val = (short) ((sample[i] * 32767));
+			// in 16 bit wav PCM, first byte is the low order byte
+			generatedSnd[idx++] = (byte) (val & 0x00ff);
+			generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
+		}
+	 
+		for (int i = numSamples - ramp; i < numSamples; i++) {
+			// scale to maximum amplitude
+			final short val = (short) ((sample[i] * 32767) * (numSamples - i) / ramp);
+			// in 16 bit wav PCM, first byte is the low order byte
+			generatedSnd[idx++] = (byte) (val & 0x00ff);
+			generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
+		}
+		
 		return generatedSnd;
 	}
 	
